@@ -1,0 +1,87 @@
+version: '2'
+
+
+#networks:
+#  redisnet:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 10.0.0.0/16
+
+services:
+#  apollo-quick-start:
+#    image: nobodyiam/apollo-quick-start
+#    container_name: apollo-quick-start
+#    depends_on:
+#      - apollo-db
+#    ports:
+#      - "8080:8080"
+#      - "8090:8090"
+#      - "8070:8070"
+#    links:
+#      - apollo-db
+#
+#  apollo-db:
+#    image: mysql:5.7
+#    container_name: apollo-db
+#    environment:
+#      TZ: Asia/Shanghai
+##      MYSQL_ROOT_PASSWORD: password1
+#      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+#      MYSQL_USER: appuser1
+#      MYSQL_PASSWORD: password1
+#    depends_on:
+#      - apollo-dbdata
+#    ports:
+#      - "13306:3306"
+#    volumes:
+#      - ./sql:/docker-entrypoint-initdb.d
+#    volumes_from:
+#      - apollo-dbdata
+#
+#  apollo-dbdata:
+#    image: alpine:latest
+#    container_name: apollo-dbdata
+#    volumes:
+#      - /home/anghel/Lynk/tools/volumes/apollo-dbdata:/var/lib/mysql
+#
+#
+#
+#  rabbitmq:
+#    image: rabbitmq:3-management
+##    hostname: my-rabbit
+#    volumes:
+#      - /home/anghel/Lynk/tools/volumes/rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
+#      - /home/anghel/Lynk/tools/volumes/rabbitmq/etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+#      - /home/anghel/Lynk/tools/volumes/rabbitmq/data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
+#      - /home/anghel/Lynk/tools/volumes/rabbitmq/logs:/var/log/rabbitmq/log
+#    ports:
+#      - 5672:5672
+#      - 15672:15672
+
+
+  redis-master:
+    image: bitnami/redis:latest
+    ports:
+      - '6379'
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=my_master_password
+      - cluster-enabled=yes
+    volumes:
+      - ./bitnamiredis:/bitnami
+
+  redis-replica:
+    image: bitnami/redis:latest
+    ports:
+      - '7000'
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT_NUMBER=6379
+      - REDIS_REPLICA_PORT=7000
+      - REDIS_MASTER_PASSWORD=my_master_password
+      - REDIS_PASSWORD=my_replica_password
+      - cluster-enabled=yes
